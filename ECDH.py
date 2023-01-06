@@ -114,30 +114,30 @@ def ECpoint_Scale_HDL(P, k):
 		if (not is_first):
 			[A, B, C, D, E, F, G, H, I] = \
 				ECpoint_Doubling_HDL(A, B, C, D, E, F, G, H, I)	# double Q: Q := 2Q
-			data_file.write(output192bits(A))
-			data_file.write(output192bits(B))
-			data_file.write(output192bits(C))
-			data_file.write(output192bits(D))
+			# data_file.write(output192bits(A))
+			# data_file.write(output192bits(B))
+			# data_file.write(output192bits(C))
+			# data_file.write(output192bits(D))
 		if int(kbitarray[j]) == 1:
 			if (is_first == 1):		# first visit
 				is_first = 0
 				A, B, C = X1, Y1, 1
 				D = mod192(A * A, p)	# prepare X0^2
-				print(output192bits(D))
+				# print(output192bits(D))
 			else:	
 				# add P: Q := Q + P
 				G, H, I = X1, Y1, 1		# refresh
 				[A, B, C, D, E, F, G, H, I] = \
 					ECpoint_Addition_HDL(A, B, C, D, E, F, G, H, I)
-				data_file.write(output192bits(A))
-				data_file.write(output192bits(B))
-				data_file.write(output192bits(C))
-				data_file.write(output192bits(D))
+				# data_file.write(output192bits(A))
+				# data_file.write(output192bits(B))
+				# data_file.write(output192bits(C))
+				# data_file.write(output192bits(D))
 		else:
 			if (not is_first):
-				print(f'{A * A:96X}')
+				# print(f'{A * A:96X}')
 				D = mod192(A * A, p)
-				print(output192bits(D))
+				# print(output192bits(D))
 	
 	# data_file.write(output192bits(A))
 	# data_file.write(output192bits(B))
@@ -148,7 +148,11 @@ def ECpoint_Scale_HDL(P, k):
     # [x y] = [X / Z^2,  Y / Z^3]
 	Z_inv2 = mod192(Z_inv * Z_inv, p)
 	Z_inv3 = mod192(Z_inv2 * Z_inv, p)
+	# print('Z^(-2): ' + output192bits(Z_inv2))
+	# print('Z^(-3): ' + output192bits(Z_inv3))
 	Q = [mod192(A * Z_inv2, p), mod192(B * Z_inv3, p)];
+	# print('Qx: ' + output192bits(Q[0]))
+	# print('Qy: ' + output192bits(Q[1]))
 
 	return Q
 
@@ -272,6 +276,7 @@ def mod192(a, p):
 	S3 = A[5] * (2**(64*2)) + A[5] * (2**(64*1)) + A[5] # S3 = {A5, A5, A5};
 
 	b = (T + S1 + S2 + S3)
+	# print('b: ' + output192bits(b))
 	# print(f'{b:X}')
 	quotient = (T + S1 + S2 + S3) // p		# quotient is usually 0, 1, 2; 
 											# theoritically, might be up to 3
@@ -327,32 +332,39 @@ def MultInv(a):
 		# print(f'r\t{r:X}')
 		# print(f'x\t{x:X}')
 		# print(f'y\t{y:X}')
-		# print(output192bits(u))
-		# print(output192bits(v))
-		# print(output192bits(s))
-		# print(output192bits(r))
-		# print(output192bits(x))
-		# print(output192bits(y))
 
 	if k > max_iter:
 		max_iter = k
 	
+	# print(k)
+	# print(f'u\t{u:X}')
+	# print(f'v\t{v:X}')
+	# print(f's\t{s:X}')
+	# print(f'r\t{r:X}')
+	# print(f'x\t{x:X}')
+	# print(f'y\t{y:X}')
 
 	# calculate (2^(-1) mod p)^k mod p
 	# That is, in python: adjust = (p//2 + 1)**k mod p
 	adjust = 1
 	factor = (p//2 + 1)
-	bitlen_k = 10							# empirical value
+	bitlen_k = 9							# empirical value
 	for i in reversed(range(bitlen_k)):
 		adjust = mod192(adjust * adjust, p)	# adjust^2 mod p
 		if (k >> (i)) % 2:					# k[i] == 1?
 			adjust = mod192(factor * adjust, p)
+			# print(f'2^(-{i}): ' + output192bits(adjust))
 
+	# print('2^(-k): ' + output192bits(adjust))
 	# r may larger than p, when a is really large
 	# r = mod192(r, p)
 	if (r > p): 
 		r = r - p
-	b = p - mod192(r * adjust, p)
+	b = mod192(r * adjust, p)
+	# print('r * adj: ' + output192bits(b))
+
+	b = p - b
+	# print('Z^(-1): ' + output192bits(b))
 
 	return b
 
@@ -365,15 +377,16 @@ def output192bits(Bin):
 	return out
 
 def outputRegfile(A, B, C, D, E, F, G, H, I):
-	f_pointadd.write(output192bits(A))
-	f_pointadd.write(output192bits(B))
-	f_pointadd.write(output192bits(C))
-	f_pointadd.write(output192bits(D))
-	f_pointadd.write(output192bits(E))
-	f_pointadd.write(output192bits(F))
-	f_pointadd.write(output192bits(G))
-	f_pointadd.write(output192bits(H))
-	f_pointadd.write(output192bits(I))
+	if False:
+		f_pointadd.write(output192bits(A))
+		f_pointadd.write(output192bits(B))
+		f_pointadd.write(output192bits(C))
+		f_pointadd.write(output192bits(D))
+		f_pointadd.write(output192bits(E))
+		f_pointadd.write(output192bits(F))
+		f_pointadd.write(output192bits(G))
+		f_pointadd.write(output192bits(H))
+		f_pointadd.write(output192bits(I))
 
 ####### Verify Multiplicative Inverse ########
 # p = 97
@@ -545,14 +558,36 @@ f_base = open('./pat/basepoint.dat', 'w')
 f_end = open('./pat/endpoint.dat', 'w')
 f_scalar = open('./pat/scalar.dat', 'w')
 
-prvkeyA = 3;
-pubkeyA = ECpoint_Scale_HDL(G, prvkeyA)
+testnum = 500
 
-for j in range(2):
-	f_base.write(output192bits(G[j]))
-	f_end.write(output192bits(pubkeyA[j]))
+for rnd in range(testnum):
+	rdnum = np.random.randint((2**32), dtype=np.uint64)
+	for i in range(5):
+		rdnum = int(rdnum*(2**32) + np.random.randint((2**32), dtype=np.uint64))
 
-f_scalar.write(output192bits(prvkeyA))
+	prvkeyA = rdnum
+	# prvkeyA = 0xB7D4_F2DE_8EC4_C000_9B51_200A_D3D8_FF2A_A32E_A163_BA78_7018
+	# print(output192bits(prvkeyA))
+	pubkeyA = ECpoint_Scale_HDL(G, prvkeyA)
+	# pubkeyA_golden = ECpoint_Scale(G, prvkeyA)
+
+	# print(f"True: Q:[{pubkeyA_golden[0]:48X},\n         {pubkeyA_golden[1]:48X}]")
+	# print(f"Veri: Q:[{pubkeyA[0]:48X},\n         {pubkeyA[1]:48X}]")
+
+	for j in range(2):
+		f_base.write(output192bits(G[j]))
+		f_end.write(output192bits(pubkeyA[j]))
+	f_scalar.write(output192bits(prvkeyA))
+	
+	rdnum = np.random.randint((2**32), dtype=np.uint64)
+	for i in range(5):
+		rdnum = int(rdnum*(2**32) + np.random.randint((2**32), dtype=np.uint64))
+	prvkeyB = rdnum
+	pubkeyB = ECpoint_Scale_HDL(pubkeyA, prvkeyB)
+	for j in range(2):
+		f_base.write(output192bits(pubkeyA[j]))
+		f_end.write(output192bits(pubkeyB[j]))
+	f_scalar.write(output192bits(prvkeyB))
 
 f_base.close()
 f_end.close()
