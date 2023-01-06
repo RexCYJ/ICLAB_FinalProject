@@ -199,42 +199,51 @@ def ECpoint_Addition_HDL(A, B, C, D, E, F, G, H, I):
 	# P0 = Q_cur, P1 = base point
 	global p
 	E = mod192(G * D, p)	# U1 = X1*Z0^2
-	# f_pointadd.write(output192bits(A))
-	# f_pointadd.write(output192bits(B))
-	# f_pointadd.write(output192bits(C))
-	# f_pointadd.write(output192bits(D))
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t01 ---------------------------
 	D = mod192(D * C, p)	# Z0^3
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t02 ---------------------------
 	I = mod192(A + p - E, p)	# W = U0 - U1
 	D = mod192(D * H, p)	# S1 = Y1 * Z0^3
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t03 ---------------------------
 	F = mod192(B + p - D, p)	# R = S0 - S1
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t04 ---------------------------
 	G = mod192(F * F, p)	# R^2
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t05 ---------------------------
 	A = mod192(A + E, p)	# T = U0 + U1
 	E = mod192(I * I, p)	# W^2
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t06 ---------------------------
 	D = mod192(D + B, p)	# M
 	B = mod192(A * E, p)	# TW^2
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t07 ---------------------------
 	A = mod192(G + p - B, p)	# X2 $$
 	E = mod192(I * E, p)	# W^3
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t08 ---------------------------
 	G = mod192(E * D, p)	# MW^3
 	D = mod192(A + A, p)	# 2X2
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t09 ---------------------------
 	B = mod192(B + p - D, p)	# V
 	# print(f'V = {B}')
 	C = mod192(C * I, p)	# Z2 $$
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t10 ---------------------------
 	F = mod192(F * B, p)	# VR
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t11 ---------------------------
 	D = mod192(A * A, p)	# X2^2
 	F = mod192(F + p - G, p)	# 2Y2
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t12 ---------------------------
 	B = mod192(F * (p//2 + 1), p)	# Y2 $$
+	outputRegfile(A, B, C, D, E, F, G, H, I)
 	# t13 ---------------------------
 	# output: A = X2, B = Y2, C = Z2, D = X2^2
 	# remenber to fresh G and H with P1
@@ -354,6 +363,17 @@ def output192bits(Bin):
 		out = out + f'_{(Bin >> (i*16)) % (2**16):04X}'
 	out = out + '\n'
 	return out
+
+def outputRegfile(A, B, C, D, E, F, G, H, I):
+	f_pointadd.write(output192bits(A))
+	f_pointadd.write(output192bits(B))
+	f_pointadd.write(output192bits(C))
+	f_pointadd.write(output192bits(D))
+	f_pointadd.write(output192bits(E))
+	f_pointadd.write(output192bits(F))
+	f_pointadd.write(output192bits(G))
+	f_pointadd.write(output192bits(H))
+	f_pointadd.write(output192bits(I))
 
 ####### Verify Multiplicative Inverse ########
 # p = 97
@@ -525,7 +545,7 @@ f_base = open('./pat/basepoint.dat', 'w')
 f_end = open('./pat/endpoint.dat', 'w')
 f_scalar = open('./pat/scalar.dat', 'w')
 
-prvkeyA = 7;
+prvkeyA = 3;
 pubkeyA = ECpoint_Scale_HDL(G, prvkeyA)
 
 for j in range(2):
